@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0a0a0a; /* Fundo preto padrão (Dark Mode) */
+  --foreground: #f3f4f6; /* Texto claro padrão */
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* =========================================
+   Regras Globais de Impressão (PDF)
+   Task 4.1: Motor de Relatórios
+========================================= */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 15mm;
+  }
+  
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    background: #ffffff; /* Fundo branco no papel */
+  }
+}
