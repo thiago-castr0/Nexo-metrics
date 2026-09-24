@@ -38,9 +38,9 @@ export function TrafficChart({ data }: TrafficChartProps) {
       <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 print:text-gray-500 mb-6">
         Evolução do Tráfego (Últimos Dias)
       </h3>
-      <div className="h-[350px] w-full">
+      <div className="h-[220px] w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={data} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+          <ComposedChart data={data} margin={{ top: 5, right: 30, left: -20, bottom: 0 }}>
             <defs>
               <linearGradient id="colorPageviews" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#39FF14" stopOpacity={0.4}/>

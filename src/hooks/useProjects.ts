@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from './useAuth';
 
 export interface Project {
   id: string;
@@ -12,10 +13,11 @@ export function useProjects() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // O estado do projeto selecionado.
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const { user } = useAuth();
 
   useEffect(() => {
+    // Only run when we know the user state (it could be null, but we'll fetch once we are sure, or just fetch right away)
     async function fetchProjects() {
       try {
         setLoading(true);
@@ -38,14 +40,18 @@ export function useProjects() {
           return map[name] || name;
         };
 
-        const formattedProjects = (data.projects || []).map((p: Project) => ({
+        let formattedProjects = (data.projects || []).map((p: Project) => ({
           ...p,
           name: formatProjectName(p.name)
         }));
 
+        // Filtro de acordo com a role
+        if (user?.role === 'prometheus') {
+           formattedProjects = formattedProjects.filter((p: Project) => p.name === 'Casa da Juventude');
+        }
+
         setProjects(formattedProjects);
         
-        // Seleciona automaticamente o primeiro projeto da lista se não houver um definido
         if (formattedProjects.length > 0 && !selectedProjectId) {
           setSelectedProjectId(formattedProjects[0].id);
         }
@@ -57,9 +63,11 @@ export function useProjects() {
       }
     }
 
-    fetchProjects();
+    if (user !== undefined) {
+      fetchProjects();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Executa apenas no carregamento inicial
+  }, [user]);
 
   return {
     projects,

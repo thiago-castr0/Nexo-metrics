@@ -2,6 +2,7 @@
 
 import { useProjects } from '@/hooks/useProjects';
 import { useAnalytics } from '@/hooks/useAnalytics';
+import { useAuth } from '@/hooks/useAuth';
 import { ProjectSelector } from '@/components/analytics/ProjectSelector';
 import { MetricCard } from '@/components/analytics/MetricCard';
 import { TrafficChart } from '@/components/analytics/TrafficChart';
@@ -12,6 +13,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 
 export default function Dashboard() {
+  const { user, logout } = useAuth();
   const { projects, selectedProjectId, setSelectedProjectId, loading: projectsLoading } = useProjects();
   const { data: analyticsData, loading: analyticsLoading, dateRange, setDateRange } = useAnalytics(selectedProjectId);
 
@@ -52,33 +54,41 @@ export default function Dashboard() {
         <div className="flex items-center">
           <Image src="/Imagens/logo 1.png" alt="Nexo Metrics" width={220} height={48} className="object-contain" />
         </div>
-        <div className="flex items-center gap-3 cursor-pointer group">
+        <div className="flex items-center gap-3 group">
           <div className="text-right hidden sm:block">
-            <p className="text-sm font-bold text-gray-100 group-hover:text-[#39FF14] transition-colors leading-tight">Admin User</p>
-            <p className="text-xs text-gray-400 leading-tight">admin@nexometrics.com</p>
+            <p className="text-sm font-bold text-gray-100 group-hover:text-[#39FF14] transition-colors leading-tight">{user?.name || 'Carregando...'}</p>
+            <p className="text-xs text-gray-400 leading-tight">{user?.role === 'admin' ? 'Administrador' : 'Visualizador'}</p>
           </div>
-          <div className="w-10 h-10 rounded-full bg-[#555] flex items-center justify-center border border-[#39FF14] shadow-[0_0_10px_rgba(57,255,20,0.2)] group-hover:shadow-[0_0_15px_rgba(57,255,20,0.5)] transition-all">
-             <span className="text-[#39FF14] font-bold text-lg">A</span>
-          </div>
+          <button 
+            onClick={logout}
+            title="Sair"
+            className="w-10 h-10 rounded-full bg-[#555] flex items-center justify-center border border-[#39FF14] shadow-[0_0_10px_rgba(57,255,20,0.2)] hover:shadow-[0_0_15px_rgba(57,255,20,0.5)] transition-all cursor-pointer"
+          >
+             <span className="text-[#39FF14] font-bold text-lg">{user?.name?.charAt(0) || 'U'}</span>
+          </button>
         </div>
       </nav>
 
-      <main className="p-6 md:p-10 w-full max-w-[1600px] mx-auto flex flex-col gap-8 print:p-0">
+      <main className="p-6 md:p-10 w-full max-w-[1600px] mx-auto flex flex-col gap-8 print:p-0 print:gap-2">
       
       {/* HEADER E CONTROLES */}
       <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 print:hidden">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-white">Dashboard Geral</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight text-white">
+            Dashboard Geral {user?.role === 'prometheus' && <span className="text-[#39FF14]">- Casa da Juventude</span>}
+          </h1>
           <p className="text-gray-400 mt-2">Acompanhe a performance dos seus projetos em tempo real.</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-4">
-          <ProjectSelector 
-            projects={projects}
-            selectedProjectId={selectedProjectId}
-            onSelect={setSelectedProjectId}
-            loading={projectsLoading}
-          />
+          {user?.role !== 'prometheus' && (
+            <ProjectSelector 
+              projects={projects}
+              selectedProjectId={selectedProjectId}
+              onSelect={setSelectedProjectId}
+              loading={projectsLoading}
+            />
+          )}
           
           <select 
             value={dateRange}
@@ -101,15 +111,16 @@ export default function Dashboard() {
       </header>
 
       {/* TÍTULO EXCLUSIVO PARA IMPRESSÃO */}
-      <div className="hidden print:block mb-6">
-        <div className="border-b border-gray-300 pb-4 mb-4 flex flex-col gap-2">
-          <Image src="/Imagens/logo 1.png" alt="Nexo Metrics" width={180} height={40} className="object-contain" />
-          <h1 className="text-3xl font-extrabold text-black mt-2">
+      <div className="hidden print:block mb-4">
+        <div className="flex justify-between items-center mb-2">
+          <h1 className="text-3xl font-extrabold text-black">
             Relatório de Tráfego Web
           </h1>
+          <Image src="/Imagens/logo 1.png" alt="Nexo Metrics" width={160} height={36} className="object-contain" />
         </div>
+        <div className="border-b border-gray-300 mb-4"></div>
         {selectedProjectId && (
-          <div className="mt-4 text-gray-700 text-lg flex flex-col gap-1">
+          <div className="text-gray-700 text-sm flex flex-col gap-1 mb-2">
             <p>Projeto: <strong className="text-black">{projects.find(p => p.id === selectedProjectId)?.name || 'Desconhecido'}</strong></p>
             <p>Período: <strong className="text-black">
               {dateRange === '1w' ? 'Última semana' : 
