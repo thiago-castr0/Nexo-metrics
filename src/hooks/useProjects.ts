@@ -28,11 +28,26 @@ export function useProjects() {
         }
         
         const data = await res.json();
-        setProjects(data.projects);
+        
+        const formatProjectName = (name: string) => {
+          const map: Record<string, string> = {
+            'casa-juventude-v1': 'Casa da Juventude',
+            'portif-lio': 'Portfólio',
+            'nexo-metrics': 'Nexo Metrics',
+          };
+          return map[name] || name;
+        };
+
+        const formattedProjects = (data.projects || []).map((p: Project) => ({
+          ...p,
+          name: formatProjectName(p.name)
+        }));
+
+        setProjects(formattedProjects);
         
         // Seleciona automaticamente o primeiro projeto da lista se não houver um definido
-        if (data.projects && data.projects.length > 0 && !selectedProjectId) {
-          setSelectedProjectId(data.projects[0].id);
+        if (formattedProjects.length > 0 && !selectedProjectId) {
+          setSelectedProjectId(formattedProjects[0].id);
         }
         
       } catch (err: any) {
